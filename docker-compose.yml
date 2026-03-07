@@ -1,0 +1,39 @@
+services:
+  mariadb:
+    image: mariadb:11.4
+    container_name: weather-color-mariadb
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: my-secret-pw
+      MARIADB_DATABASE: colorschemes
+    ports:
+      - "3308:3306"
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - ./docker/mariadb-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mariadb-admin", "ping", "-h", "localhost", "-pmy-secret-pw"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build: .
+    container_name: weather-color-api
+    restart: unless-stopped
+    environment:
+      DB_HOST: mariadb
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: my-secret-pw
+      DB_NAME: colorschemes
+      DB_POOL_SIZE: 5
+      DB_POOL_CREATE_RETRIES: 20
+    ports:
+      - "8000:8000"
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+volumes:
+  mariadb_data:
