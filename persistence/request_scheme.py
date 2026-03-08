@@ -31,7 +31,7 @@ def request_scheme(req: ColorRequest) -> ColorResponse:
     return ColorResponse(
         background=Color(row[0]),
         surface=Color(row[1]),
-        primary_accent=Color(row[2]),
+        primary_color=Color(row[2]),
         secondary_color=Color(row[3]),
     )
 
